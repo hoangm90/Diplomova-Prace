@@ -57,10 +57,13 @@ for i in range(0, len(data) - 1):
             connect_to_subject[data[j][0]['Subject']].append(data[i][0]['Subject'])
 
 #sorting subjects according to their degree
-degree_of_subject = sorted(degree_of_subject)
+degree_of_subject = sorted(degree_of_subject.items(), key=lambda x: x[1], reverse=True)
+sorted_subject = []
+for subject in degree_of_subject:
+  sorted_subject.append(subject[0])
 
 #assigning color to subjects
-for subject in degree_of_subject:
+for subject in sorted_subject:
   color = 0
   while color_of_subject[subject] == -1:
     can_use_this_color = True
