@@ -1,0 +1,36 @@
+[
+  [
+    {"Subject": "Physics"},
+	  {"Teacher's name":"John Doe"},
+	  {"Group": ["21-3-KIT-C", "21-3-TOMO-C"]},
+	  {"Classroom":"S5A"}
+  ],
+
+  [
+    {"Subject": "Maths"},
+	  {"Teacher's name":"John Doe"},
+	  {"Group": ["21-3-LT-C", "21-3-TOMO-C"]},
+	  {"Classroom":"S5B"}
+  ],
+
+  [
+    {"Subject": "Wireless Communication"},
+	  {"Teacher's name":"Peter Phan"},
+	  {"Group": ["21-3-LT-C"]},
+	  {"Classroom":"S4"}
+  ],
+
+  [
+    {"Subject": "Network"},
+	  {"Teacher's name":"Anna Smith"},
+	  {"Group": ["21-3-KIT-C"]},
+	  {"Classroom":"S5B"}
+  ],
+
+ [
+    {"Subject": "Ammunition"},
+	  {"Teacher's name":"Duy Nguyen"},
+	  {"Group": ["21-3-ZM-C"]},
+	  {"Classroom":"S9"}
+  ]
+]
