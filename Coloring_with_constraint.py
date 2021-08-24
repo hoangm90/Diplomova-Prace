@@ -102,12 +102,10 @@ def main():
               connect_to_subject[data[j][0]['Subject']].append(data[i][0]['Subject'])
 
   #sorting subjects according to their degree
-  degree_of_subject = sorted(degree_of_subject)
-
-  #assigning subject to list of subjects according to their degree
+  degree_of_subject = sorted(degree_of_subject.items(), key=lambda x: x[1], reverse=True)
   sorted_subject = []
   for subject in degree_of_subject:
-    sorted_subject.append(subject)
+    sorted_subject.append(subject[0])
 
   #assigning color to subject
   t = coloring(0, sorted_subject, connect_to_subject, color_of_subject, constraint_color)
