@@ -1,1 +1,1 @@
-# Diplomov-Pr-ce
+# DiplomovaPrace
