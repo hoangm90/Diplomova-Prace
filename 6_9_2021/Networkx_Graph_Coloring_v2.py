@@ -84,7 +84,7 @@ for k in range(100):
   if k == 0:
     nodes = sorted(G, key=G.degree, reverse=True)
   else:
-  # order the node randomly to assure that the algorithm is 
+  # order the node randomly to assure that the algorithm is stochastic
     t = 1000 * time.time() # current time in milliseconds
     random.seed(int(t) % 2**32)
     nodes = list(G)
