@@ -1,6 +1,7 @@
 import networkx as nx
 import random
 import json
+import time
 
 #loading data from json file
 f = open('rozvrh.json',)
@@ -55,6 +56,7 @@ teacher_not_available = {}
 for i in range(len(data['teachers'])):
   teacher_not_available[data['teachers'][i]['id']] = []
 
+random.seed(2)
 for teacherId in teacher_not_available.keys():
   n = random.randint(0, 200)
 
@@ -65,7 +67,7 @@ for teacherId in teacher_not_available.keys():
     
     teacher_not_available[teacherId].append(color)
   
-# open the file that saves the adjacent graph of lessons 
+# open the file that saves the adjancent graph of lessons 
 # which has been created before, and assign the graph to variable G
 fh = open("test.adjlist", "rb")
 G = nx.read_adjlist(fh)
@@ -82,7 +84,9 @@ for k in range(100):
   if k == 0:
     nodes = sorted(G, key=G.degree, reverse=True)
   else:
-  # order the node randomly to assure that the algorithm is stochastic
+  # order the node randomly to assure that the algorithm is 
+    t = 1000 * time.time() # current time in milliseconds
+    random.seed(int(t) % 2**32)
     nodes = list(G)
     random.shuffle(nodes)
 
