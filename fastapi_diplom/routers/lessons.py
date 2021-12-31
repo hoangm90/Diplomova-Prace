@@ -1,9 +1,10 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from typing import List
 
-import schemas, crud, dependency
-import sort_lessons
+import models_and_schemas.schemas as schemas 
+import crud
+import manage_database.dependency as dependency
+import helper_function.sort_lessons as sort_lessons
 
 router = APIRouter(
     prefix="/lessons",
@@ -36,3 +37,20 @@ def delete_lesson(lesson_id: str, db: Session = Depends(dependency.get_db)):
     if db_lesson == None:
         raise HTTPException(status_code=404, detail="Lesson not found!")
     return crud.delete_lesson(db, lesson_id)
+
+@router.put("/")
+def update_lesson(
+    updated_lesson: schemas.Create_lesson,
+    db: Session = Depends(dependency.get_db)
+    ):
+    db_lesson = crud.get_lesson(db, updated_lesson.lesson.lesson_id)
+    if db_lesson == None:
+        raise HTTPException(status_code=404, detail="Lesson not found!")
+    return crud.update_lesson(db, updated_lesson.lesson, updated_lesson.group_ids, updated_lesson.teacher_ids, updated_lesson.classroom_ids)
+
+@router.put("/change_time")
+def change_lesson_time(lesson_id: str, new_time: str, db: Session = Depends(dependency.get_db)):
+    db_lesson = crud.get_lesson(db, lesson_id)
+    if db_lesson == None:
+        raise HTTPException(status_code=404, detail="Lesson not found!")
+    return crud.change_lesson_time(db, lesson_id, new_time)

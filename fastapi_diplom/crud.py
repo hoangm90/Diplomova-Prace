@@ -1,7 +1,9 @@
 from sqlalchemy.orm import Session
 from typing import List
+
 from fastapi import HTTPException
-import models, schemas
+from models_and_schemas import models, schemas
+import helper_function.color_to_time as color_to_time
 
 # function for lessons
 def get_all_lessons(db: Session):
@@ -41,6 +43,117 @@ def create_lesson(
         db.refresh(db_relation_lesson_classroom)
 
     return db_lesson
+
+def update_lesson(
+    db: Session, 
+    lesson: schemas.LessonBase, 
+    group_ids: List[str],
+    teacher_ids: List[str],
+    classroom_ids: List[str]
+    ):
+    can_change = True
+    dict_te = {}
+    dict_gr = {}
+
+    for u in db.query(models.Relation_lesson_teacher).all():
+        if dict_te.get(u.__dict__["lesson_id"]) == None:
+            dict_te[u.__dict__["lesson_id"]] = []
+        dict_te[u.__dict__["lesson_id"]].append(u.__dict__["teacher_id"])
+    
+    for u in db.query(models.Relation_lesson_group).all():
+        if dict_gr.get(u.__dict__["lesson_id"]) == None:
+            dict_gr[u.__dict__["lesson_id"]] = []
+        dict_gr[u.__dict__["lesson_id"]].append(u.__dict__["group_id"])
+    
+    dict_les_te = {}
+    dict_les_gr = {}
+    for te in teacher_ids:
+        dict_les_te[te] = True
+    for gr in group_ids:
+        dict_les_gr[gr] = True
+
+    for ls in db.query(models.Lesson).filter(models.Lesson.color == lesson.color).all():
+        if ls.__dict__["chosen_classroom"] != "" and ls.__dict__["chosen_classroom"] == lesson.chosen_classroom:
+            can_change = False
+            break
+        if dict_te.get(ls.__dict__["lesson_id"]) != None:
+            for te in dict_te.get(ls.__dict__["lesson_id"]):
+                if dict_les_te.get(te):
+                    can_change = False
+                    break
+        if not can_change:
+            break
+        
+        if dict_gr.get(ls.__dict__["lesson_id"]):
+            for gr in dict_gr.get(ls.__dict__["lesson_id"]):
+                if dict_les_gr.get(gr):
+                    can_change = False
+                    break
+        if not can_change:
+            break
+    
+    if can_change:
+        delete_lesson(db, lesson.lesson_id)
+        create_lesson(db, lesson, group_ids, teacher_ids, classroom_ids)
+    else:
+        raise HTTPException(status_code=400, detail="The lesson cannot be added to this time!")
+    return 
+        
+def change_lesson_time(db: Session, lesson_id: str, new_time: str):
+    color = color_to_time.time_to_color(new_time)
+    if color == -1:
+        raise HTTPException(status_code=400, detail="The time format is wrong!")
+
+    dict_te = {}
+    dict_gr = {}  
+    for u in db.query(models.Relation_lesson_teacher).all():
+        if dict_te.get(u.__dict__["lesson_id"]) == None:
+            dict_te[u.__dict__["lesson_id"]] = []
+        dict_te[u.__dict__["lesson_id"]].append(u.__dict__["teacher_id"])
+    
+    for u in db.query(models.Relation_lesson_group).all():
+        if dict_gr.get(u.__dict__["lesson_id"]) == None:
+            dict_gr[u.__dict__["lesson_id"]] = []
+        dict_gr[u.__dict__["lesson_id"]].append(u.__dict__["group_id"])
+    
+    dict_les_te = {}
+    dict_les_gr = {}
+    for db_rela in db.query(models.Relation_lesson_teacher).filter(models.Relation_lesson_teacher.lesson_id == lesson_id).all():
+        dict_les_te[db_rela.teacher_id] = True
+    for db_rela in db.query(models.Relation_lesson_group).filter(models.Relation_lesson_group.lesson_id == lesson_id).all():
+        dict_les_gr[db_rela.group_id] = True
+    chosen_cl = db.query(models.Lesson).filter(models.Lesson.lesson_id == lesson_id).first().chosen_classroom
+    
+    can_change = True
+    for db_lesson in db.query(models.Lesson).filter(models.Lesson.color == color):
+        if db_lesson.chosen_classroom != "" and db_lesson.chosen_classroom == chosen_cl:
+            can_change = False
+            break
+        if dict_te.get(db_lesson.__dict__["lesson_id"]) != None:
+            for te in dict_te.get(db_lesson.__dict__["lesson_id"]):
+                if dict_les_te.get(te):
+                    can_change = False
+                    break
+        if not can_change:
+            break
+        
+        if dict_gr.get(db_lesson.__dict__["lesson_id"]):
+            for gr in dict_gr.get(db_lesson.__dict__["lesson_id"]):
+                if dict_les_gr.get(gr):
+                    can_change = False
+                    break
+        if not can_change:
+            break
+    
+    if can_change:
+        db_ls = db.query(models.Lesson).filter(models.Lesson.lesson_id == lesson_id).first()
+        db_ls.color = color
+        db_ls.time = new_time
+        db.commit()
+        db.refresh(db_ls)
+        return db_ls
+    raise HTTPException(status_code=400, detail="The lesson cannot be added to this time!")
+        
 
 def delete_lesson(db: Session, lesson_id: str):
     for u in db.query(models.Relation_lesson_teacher).filter(models.Relation_lesson_teacher.lesson_id == lesson_id).all():
@@ -125,3 +238,13 @@ def delete_item(db: Session, id: str, name: str):
     else:
         raise HTTPException(status_code=404, detail= name + " not found")
     return db_item
+
+def delete_all_item(db: Session, name:str):
+    item_model = getattr(models, name)
+    for db_item in db.query(item_model).all():
+        db.delete(db_item)
+
+    item_relation_model = getattr(models, "Relation_lesson_" + name.lower())
+    for db_rela in db.query(item_relation_model).all():
+        db.delete(db_rela)
+    db.commit()
