@@ -118,21 +118,34 @@ def change_lesson_time(db: Session, lesson_id: str, new_time: str):
     
     dict_les_te = {}
     dict_les_gr = {}
+    dict_les_cl = {}
+    num_cl = 0
     for db_rela in db.query(models.Relation_lesson_teacher).filter(models.Relation_lesson_teacher.lesson_id == lesson_id).all():
         dict_les_te[db_rela.teacher_id] = True
     for db_rela in db.query(models.Relation_lesson_group).filter(models.Relation_lesson_group.lesson_id == lesson_id).all():
         dict_les_gr[db_rela.group_id] = True
+    for db_rela in db.query(models.Relation_lesson_classroom).filter(models.Relation_lesson_classroom.lesson_id == lesson_id).all():
+        dict_les_cl[db_rela.classroom_id] = True
+        num_cl += 1
     chosen_cl = db.query(models.Lesson).filter(models.Lesson.lesson_id == lesson_id).first().chosen_classroom
     
     can_change = True
+    message = ""
     for db_lesson in db.query(models.Lesson).filter(models.Lesson.color == color):
-        if db_lesson.chosen_classroom != "" and db_lesson.chosen_classroom == chosen_cl:
-            can_change = False
-            break
+        if chosen_cl != "":
+            if db_lesson.chosen_classroom != "" and dict_les_cl.get(db_lesson.chosen_classroom):
+                num_cl -= 1
+                dict_les_cl[db_lesson.chosen_classroom] = False
+                if num_cl == 0:
+                    can_change = False
+                    message = "there is no available classroom!"
+                    break
+
         if dict_te.get(db_lesson.__dict__["lesson_id"]) != None:
             for te in dict_te.get(db_lesson.__dict__["lesson_id"]):
                 if dict_les_te.get(te):
                     can_change = False
+                    message = "the teacher is busy!"
                     break
         if not can_change:
             break
@@ -141,6 +154,7 @@ def change_lesson_time(db: Session, lesson_id: str, new_time: str):
             for gr in dict_gr.get(db_lesson.__dict__["lesson_id"]):
                 if dict_les_gr.get(gr):
                     can_change = False
+                    message = "the group is busy!"
                     break
         if not can_change:
             break
@@ -148,11 +162,19 @@ def change_lesson_time(db: Session, lesson_id: str, new_time: str):
     if can_change:
         db_ls = db.query(models.Lesson).filter(models.Lesson.lesson_id == lesson_id).first()
         db_ls.color = color
+        new_time = new_time.split()
+        new_time[3] = new_time[3].capitalize()
+        new_time = " ".join(new_time)
         db_ls.time = new_time
+        if not dict_les_cl[chosen_cl]:
+            for cl in dict_les_cl:
+                if dict_les_cl[cl]:
+                    db_ls.chosen_classroom = cl
+        
         db.commit()
         db.refresh(db_ls)
         return db_ls
-    raise HTTPException(status_code=400, detail="The lesson cannot be added to this time!")
+    raise HTTPException(status_code=400, detail="The lesson cannot be added to this time because " + message)
         
 
 def delete_lesson(db: Session, lesson_id: str):
