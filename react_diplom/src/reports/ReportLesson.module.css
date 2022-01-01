@@ -1,0 +1,20 @@
+table, th, td {
+    border: 1px solid black;
+    vertical-align: top;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+.noData {
+    border: hidden;
+}
+
+.even {
+    background-color:yellow;
+}
+  
+.odd {
+    background-color:lightblue;
+}

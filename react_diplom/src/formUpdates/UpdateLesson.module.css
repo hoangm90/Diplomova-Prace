@@ -1,0 +1,9 @@
+div .lesson {
+    border: 1px solid black; 
+    margin: 10px 0;
+}
+
+form {
+    max-width: 40rem;
+    margin: auto;
+}
