@@ -1,0 +1,26 @@
+version: '3.4'
+
+services:
+  python_fastapi:
+    image: hoangquoc97hn/diploma_work:python_fastapi
+    build: 
+      context: ./fastapi_microservice
+    ports:
+      - 5001:8000
+  
+  js:
+    image: hoangquoc97hn/diploma_work:js
+    build: 
+      context: ./simple_ui
+    ports:
+      - 5002:3000
+  
+  nginx:
+    image: hoangquoc97hn/diploma_work:nginx
+    build: 
+      context: ./nginx
+    ports:
+      - 5003:80
+    depends_on:
+      - python_fastapi
+      - js
