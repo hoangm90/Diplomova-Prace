@@ -1,3 +1,0 @@
-fastapi==0.68.1
-uvicorn[standard]
-networkx==2.6.3
