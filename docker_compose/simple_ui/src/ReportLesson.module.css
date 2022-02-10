@@ -1,0 +1,38 @@
+table, th, td {
+    border: 1px solid black;
+    vertical-align: top;
+    text-align: center;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+.noData {
+    border: hidden;
+    min-height: 20vh;
+}
+
+.smallTable{
+    height: 100%;
+    width: 100%;
+}
+
+.even {
+    background-color:yellow;
+    width: 20%;
+    height: 20%;
+}
+  
+.odd {
+    background-color:lightblue;
+    width: 20%;
+    height: 20%;
+}
+
+.mainTable {
+    margin: 3% 5%;
+    width: 90%;
+}
+
+
