@@ -16,7 +16,7 @@ async def websocket_endpoint(websocket: WebSocket):
     while True:
         try:
             raw_data = await websocket.receive_text()
-            resp = "hehe ok!"
+            resp = planning.return_planned_timetables(raw_data=raw_data)
             await websocket.send_json(resp)
         except Exception as e:
             print(e)

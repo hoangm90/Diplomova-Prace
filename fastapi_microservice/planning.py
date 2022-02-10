@@ -262,7 +262,6 @@ def sort_lessons(lessons_raw):
 ################################################################################################
 def return_planned_timetables(raw_data: bytes):
     data = json.loads(raw_data)
-    print("ok")
     lessons, smallest_number_color = coloring(data)
     color_to_time = color_time.color_to_time(smallest_number_color)
 

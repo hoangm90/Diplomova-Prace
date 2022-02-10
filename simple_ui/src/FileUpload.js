@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ReportLesson from './ReportLesson';
 import classes from './FileUpload.module.css'
 
-const URL = "ws:localhost:5003/ws";
+const URL = "ws:localhost:5003/api/ws";
 
 function FileUpload(){
     const [chosenFile, setChosenFile] = useState(null);
@@ -67,7 +67,7 @@ function FileUpload(){
         </div>
         {
             data &&
-            <div>{data}</div>
+            <ReportLesson lessons={data["events"]} teachers={data["teachers"]} groups={data["groups"]} classrooms={data["classrooms"]} />
         }
         </>
         
