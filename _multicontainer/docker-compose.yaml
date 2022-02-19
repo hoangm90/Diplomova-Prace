@@ -22,7 +22,7 @@ services:
     build:
       context: ./comparer
     depends_on:
-      - postgres
+      - painter
     
   painter:
     image: painter
